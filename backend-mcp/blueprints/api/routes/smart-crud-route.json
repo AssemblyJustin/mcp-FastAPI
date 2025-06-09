@@ -1,0 +1,54 @@
+{
+  "id": "smart-crud-route",
+  "name": "Smart CRUD Route Generator",
+  "description": "AI-first blueprint with embedded executable code template",
+  "version": "2.0.0",
+  "strategy": "embedded-template",
+  
+  "parameters": {
+    "resourceName": {
+      "type": "string",
+      "required": true,
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "modelName": {
+      "type": "string", 
+      "required": true,
+      "pattern": "^[A-Z][a-zA-Z0-9]*$"
+    },
+    "authRequired": {
+      "type": "boolean",
+      "default": true
+    },
+    "routePrefix": {
+      "type": "string",
+      "default": "/api/v1"
+    }
+  },
+  
+  "codeTemplate": {
+    "language": "python",
+    "executable": true,
+    "testable": true,
+    "content": "from fastapi import APIRouter, Depends, HTTPException, status, Query\nfrom typing import List, Optional\nfrom sqlalchemy.orm import Session\n\nfrom ...models.{{resourceName}}_models import (\n    {{modelName}}Create,\n    {{modelName}}Update,\n    {{modelName}}Response\n)\nfrom ...services.{{resourceName}}_service import {{modelName}}Service\nfrom ...dependencies import get_db{{#if authRequired}}, get_current_user{{/if}}\n{{#if authRequired}}from ...models.auth_models import User{{/if}}\n\nrouter = APIRouter(\n    prefix=\"{{routePrefix}}/{{resourceName}}s\",\n    tags=[\"{{resourceName}}s\"]\n)\n\n\n@router.get(\"/\", response_model=List[{{modelName}}Response])\nasync def list_{{resourceName}}s(\n    skip: int = Query(0, ge=0),\n    limit: int = Query(100, ge=1, le=1000),\n    {{#if authRequired}}current_user: User = Depends(get_current_user),{{/if}}\n    db: Session = Depends(get_db)\n) -> List[{{modelName}}Response]:\n    \"\"\"List {{resourceName}}s with pagination\"\"\"\n    try:\n        service = {{modelName}}Service(db)\n        items = await service.get_{{resourceName}}s(skip=skip, limit=limit)\n        return [{{modelName}}Response.from_orm(item) for item in items]\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=\"Failed to retrieve {{resourceName}}s\")\n\n\n@router.get(\"/{{{resourceName}}_id}\", response_model={{modelName}}Response)\nasync def get_{{resourceName}}(\n    {{resourceName}}_id: int,\n    {{#if authRequired}}current_user: User = Depends(get_current_user),{{/if}}\n    db: Session = Depends(get_db)\n) -> {{modelName}}Response:\n    \"\"\"Get {{resourceName}} by ID\"\"\"\n    try:\n        service = {{modelName}}Service(db)\n        item = await service.get_{{resourceName}}({{resourceName}}_id)\n        if not item:\n            raise HTTPException(status_code=404, detail=\"{{modelName}} not found\")\n        return {{modelName}}Response.from_orm(item)\n    except HTTPException:\n        raise\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=\"Failed to retrieve {{resourceName}}\")\n\n\n@router.post(\"/\", response_model={{modelName}}Response, status_code=201)\nasync def create_{{resourceName}}(\n    {{resourceName}}_data: {{modelName}}Create,\n    {{#if authRequired}}current_user: User = Depends(get_current_user),{{/if}}\n    db: Session = Depends(get_db)\n) -> {{modelName}}Response:\n    \"\"\"Create new {{resourceName}}\"\"\"\n    try:\n        service = {{modelName}}Service(db)\n        item = await service.create_{{resourceName}}({{resourceName}}_data)\n        return {{modelName}}Response.from_orm(item)\n    except ValueError as e:\n        raise HTTPException(status_code=400, detail=str(e))\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=\"Failed to create {{resourceName}}\")\n\n\n@router.put(\"/{{{resourceName}}_id}\", response_model={{modelName}}Response)\nasync def update_{{resourceName}}(\n    {{resourceName}}_id: int,\n    {{resourceName}}_data: {{modelName}}Update,\n    {{#if authRequired}}current_user: User = Depends(get_current_user),{{/if}}\n    db: Session = Depends(get_db)\n) -> {{modelName}}Response:\n    \"\"\"Update {{resourceName}}\"\"\"\n    try:\n        service = {{modelName}}Service(db)\n        item = await service.update_{{resourceName}}({{resourceName}}_id, {{resourceName}}_data)\n        if not item:\n            raise HTTPException(status_code=404, detail=\"{{modelName}} not found\")\n        return {{modelName}}Response.from_orm(item)\n    except HTTPException:\n        raise\n    except ValueError as e:\n        raise HTTPException(status_code=400, detail=str(e))\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=\"Failed to update {{resourceName}}\")\n\n\n@router.delete(\"/{{{resourceName}}_id}\", status_code=204)\nasync def delete_{{resourceName}}(\n    {{resourceName}}_id: int,\n    {{#if authRequired}}current_user: User = Depends(get_current_user),{{/if}}\n    db: Session = Depends(get_db)\n) -> None:\n    \"\"\"Delete {{resourceName}}\"\"\"\n    try:\n        service = {{modelName}}Service(db)\n        success = await service.delete_{{resourceName}}({{resourceName}}_id)\n        if not success:\n            raise HTTPException(status_code=404, detail=\"{{modelName}} not found\")\n    except HTTPException:\n        raise\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=\"Failed to delete {{resourceName}}\")"
+  },
+  
+  "testTemplate": {
+    "language": "python",
+    "framework": "pytest",
+    "content": "import pytest\nfrom fastapi.testclient import TestClient\nfrom backend_mcp.main import app\n\nclient = TestClient(app)\n\nclass Test{{modelName}}API:\n    def test_create_{{resourceName}}_success(self):\n        response = client.post(\"/{{routePrefix}}/{{resourceName}}s\", json={\n            # Test data here\n        })\n        assert response.status_code == 201\n    \n    def test_get_{{resourceName}}_success(self):\n        response = client.get(\"/{{routePrefix}}/{{resourceName}}s/1\")\n        assert response.status_code == 200"
+  },
+  
+  "validation": {
+    "syntax": ["python", "fastapi"],
+    "linting": ["flake8", "black", "mypy"],
+    "security": ["bandit"],
+    "testing": ["pytest"]
+  },
+  
+  "metadata": {
+    "estimatedTokens": 1200,
+    "generationTime": "<1s",
+    "aiOptimized": true
+  }
+}

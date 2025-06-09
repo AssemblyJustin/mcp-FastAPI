@@ -1,0 +1,256 @@
+{
+  "id": "create-crud-route",
+  "name": "Create CRUD Route",
+  "description": "Create a complete CRUD FastAPI route with all standard operations",
+  "version": "1.0.0",
+  "category": "api/routes",
+  "parameters": {
+    "required": ["resourceName", "modelName"],
+    "optional": ["routePrefix", "authRequired", "tags", "description"],
+    "resourceName": {
+      "type": "string",
+      "description": "Resource name in snake_case (e.g., 'user', 'product')",
+      "required": true,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "examples": ["user", "product", "order_item"]
+    },
+    "modelName": {
+      "type": "string",
+      "description": "Pydantic model name in PascalCase (e.g., 'User', 'Product')",
+      "required": true,
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "examples": ["User", "Product", "OrderItem"]
+    },
+    "routePrefix": {
+      "type": "string",
+      "description": "API route prefix",
+      "default": "/api/v1",
+      "pattern": "^/[a-z0-9/_-]*$",
+      "examples": ["/api/v1", "/api/v2", "/admin/api"]
+    },
+    "authRequired": {
+      "type": "boolean",
+      "description": "Whether authentication is required for all endpoints",
+      "default": true
+    },
+    "tags": {
+      "type": "array",
+      "description": "OpenAPI tags for the route group",
+      "default": ["{{resourceName}}s"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the resource and its purpose",
+      "default": "CRUD operations for {{resourceName}} management"
+    },
+    "enableSoftDelete": {
+      "type": "boolean",
+      "description": "Whether to use soft delete instead of hard delete",
+      "default": false
+    },
+    "paginationDefaults": {
+      "type": "object",
+      "description": "Default pagination settings",
+      "properties": {
+        "defaultLimit": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "maxLimit": {
+          "type": "integer",
+          "default": 1000,
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "template": "fastapi/crud_route_template.py",
+  "codeExample": "api/routes/{{resourceName}}_routes.py",
+  "outputPath": "api/routes/{{resourceName}}_routes.py",
+  "validation": {
+    "syntax": ["python", "fastapi", "pydantic"],
+    "required": [
+      "proper-typing",
+      "error-handling",
+      "status-codes",
+      "documentation",
+      "pagination",
+      "input-validation"
+    ],
+    "forbidden": [
+      "hardcoded-secrets",
+      "sql-injection-risk",
+      "missing-error-handling",
+      "undocumented-endpoints"
+    ],
+    "security": [
+      "input-validation",
+      "authentication-check",
+      "authorization-patterns",
+      "error-message-sanitization"
+    ],
+    "performance": [
+      "pagination-implementation",
+      "query-optimization",
+      "response-model-usage"
+    ]
+  },
+  "dependencies": {
+    "models": [
+      "{{resourceName}}_models.{{modelName}}Base",
+      "{{resourceName}}_models.{{modelName}}Create",
+      "{{resourceName}}_models.{{modelName}}Update",
+      "{{resourceName}}_models.{{modelName}}Response"
+    ],
+    "services": [
+      "{{resourceName}}_service.{{modelName}}Service"
+    ],
+    "dependencies": [
+      "dependencies.get_current_user",
+      "dependencies.get_db"
+    ],
+    "external": [
+      "fastapi",
+      "sqlalchemy",
+      "pydantic"
+    ]
+  },
+  "generatedEndpoints": [
+    {
+      "method": "GET",
+      "path": "/{{resourceName}}s",
+      "function": "list_{{resourceName}}s",
+      "description": "List {{resourceName}}s with pagination",
+      "responseModel": "List[{{modelName}}Response]",
+      "statusCode": 200
+    },
+    {
+      "method": "GET",
+      "path": "/{{resourceName}}s/{{{resourceName}}_id}",
+      "function": "get_{{resourceName}}",
+      "description": "Get {{resourceName}} by ID",
+      "responseModel": "{{modelName}}Response",
+      "statusCode": 200
+    },
+    {
+      "method": "POST",
+      "path": "/{{resourceName}}s",
+      "function": "create_{{resourceName}}",
+      "description": "Create new {{resourceName}}",
+      "requestModel": "{{modelName}}Create",
+      "responseModel": "{{modelName}}Response",
+      "statusCode": 201
+    },
+    {
+      "method": "PUT",
+      "path": "/{{resourceName}}s/{{{resourceName}}_id}",
+      "function": "update_{{resourceName}}",
+      "description": "Update {{resourceName}}",
+      "requestModel": "{{modelName}}Update",
+      "responseModel": "{{modelName}}Response",
+      "statusCode": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/{{resourceName}}s/{{{resourceName}}_id}",
+      "function": "delete_{{resourceName}}",
+      "description": "Delete {{resourceName}}",
+      "statusCode": 204
+    }
+  ],
+  "rollback": {
+    "strategy": "delete-file",
+    "checkpoints": [
+      "before-creation",
+      "after-validation",
+      "after-testing"
+    ],
+    "backupLocation": "backups/{{timestamp}}/{{resourceName}}_routes.py"
+  },
+  "testing": {
+    "unitTests": {
+      "location": "tests/unit/test_{{resourceName}}_routes.py",
+      "coverage": 90,
+      "testCases": [
+        "test_list_{{resourceName}}s_success",
+        "test_list_{{resourceName}}s_pagination",
+        "test_get_{{resourceName}}_success",
+        "test_get_{{resourceName}}_not_found",
+        "test_create_{{resourceName}}_success",
+        "test_create_{{resourceName}}_validation_error",
+        "test_update_{{resourceName}}_success",
+        "test_update_{{resourceName}}_not_found",
+        "test_delete_{{resourceName}}_success",
+        "test_delete_{{resourceName}}_not_found"
+      ]
+    },
+    "integrationTests": {
+      "location": "tests/integration/test_{{resourceName}}_api.py",
+      "testCases": [
+        "test_crud_workflow",
+        "test_authentication_required",
+        "test_error_handling",
+        "test_pagination_limits"
+      ]
+    },
+    "loadTests": {
+      "location": "tests/load/test_{{resourceName}}_load.py",
+      "metrics": [
+        "response_time_p95",
+        "throughput_rps",
+        "error_rate"
+      ]
+    },
+    "securityTests": {
+      "location": "tests/security/test_{{resourceName}}_security.py",
+      "testCases": [
+        "test_authentication_bypass",
+        "test_authorization_checks",
+        "test_input_validation",
+        "test_sql_injection_protection"
+      ]
+    }
+  },
+  "metadata": {
+    "estimatedTokens": 3500,
+    "estimatedComplexity": 8,
+    "estimatedGenerationTime": "2-3 seconds",
+    "tags": ["api", "crud", "routes", "{{resourceName}}"],
+    "author": "FastAPI MCP Blueprint System",
+    "lastUpdated": "2024-01-01",
+    "blueprintVersion": "1.0.0",
+    "compatibleVersions": ["fastapi>=0.100.0", "pydantic>=2.0.0"]
+  },
+  "examples": {
+    "user": {
+      "resourceName": "user",
+      "modelName": "User",
+      "routePrefix": "/api/v1",
+      "authRequired": true,
+      "description": "User management CRUD operations"
+    },
+    "product": {
+      "resourceName": "product",
+      "modelName": "Product",
+      "routePrefix": "/api/v1",
+      "authRequired": false,
+      "description": "Product catalog CRUD operations"
+    }
+  },
+  "documentation": {
+    "openapi": {
+      "generateSchemas": true,
+      "includeExamples": true,
+      "tagDescription": "{{description}}"
+    },
+    "readme": {
+      "generateUsageExamples": true,
+      "includeTestingInstructions": true
+    }
+  }
+}

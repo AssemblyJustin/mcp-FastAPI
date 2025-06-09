@@ -1,0 +1,55 @@
+{
+  "id": "create-fastapi-route",
+  "name": "Create FastAPI Route",
+  "description": "Create a new FastAPI route with CRUD operations",
+  "version": "1.0.0",
+  "parameters": {
+    "required": ["routeName", "modelName", "outputPath"],
+    "optional": ["routePrefix", "tags", "dependencies"],
+    "routeName": {
+      "type": "string",
+      "description": "Name of the route (lowercase)",
+      "required": true
+    },
+    "modelName": {
+      "type": "string",
+      "description": "Name of the Pydantic model (PascalCase)",
+      "required": true
+    },
+    "outputPath": {
+      "type": "string",
+      "description": "Output path for the generated file",
+      "required": true
+    },
+    "routePrefix": {
+      "type": "string",
+      "description": "API prefix for the route",
+      "default": "/api"
+    },
+    "tags": {
+      "type": "array",
+      "description": "OpenAPI tags for the route",
+      "default": []
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Dependencies for the route",
+      "default": []
+    }
+  },
+  "template": "fastapi/router_template.py",
+  "codeExample": "fastapi/routes/users.py",
+  "validation": {
+    "syntax": ["python", "fastapi"],
+    "required": ["proper-typing", "proper-error-handling"],
+    "forbidden": ["hardcoded-credentials"]
+  },
+  "rollback": {
+    "strategy": "delete-file",
+    "checkpoints": ["before-creation", "after-validation"]
+  },
+  "metadata": {
+    "estimatedComplexity": 3,
+    "dependencies": ["fastapi", "pydantic"]
+  }
+} 
