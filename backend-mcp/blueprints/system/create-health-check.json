@@ -1,0 +1,12 @@
+{
+  "name": "create-health-check",
+  "action": "create",
+  "layer": "system",
+  "resource": "health",
+  "description": "Creates health check endpoint",
+  "template": {
+    "imports": ["from fastapi import APIRouter"],
+    "class_name": "HealthCheck",
+    "methods": ["check_health", "check_database", "check_dependencies"]
+  }
+}

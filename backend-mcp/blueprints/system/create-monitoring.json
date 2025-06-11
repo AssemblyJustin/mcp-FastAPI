@@ -1,0 +1,12 @@
+{
+  "name": "create-monitoring",
+  "action": "create",
+  "layer": "system",
+  "resource": "monitoring",
+  "description": "Creates monitoring system",
+  "template": {
+    "imports": ["from typing import Dict, Any"],
+    "class_name": "MonitoringSystem",
+    "methods": ["collect_metrics", "log_performance", "alert"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "create-middleware-cors",
+  "action": "create",
+  "layer": "middleware",
+  "resource": "cors",
+  "description": "Creates CORS middleware",
+  "template": {
+    "imports": ["from fastapi.middleware.cors import CORSMiddleware"],
+    "class_name": "CORSConfig",
+    "methods": ["configure_cors"]
+  }
+}

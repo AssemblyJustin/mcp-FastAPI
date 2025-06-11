@@ -1,0 +1,12 @@
+{
+  "name": "create-supabase-client",
+  "action": "create",
+  "layer": "database",
+  "resource": "supabase-client",
+  "description": "Creates Supabase client setup",
+  "template": {
+    "imports": ["from supabase import create_client"],
+    "class_name": "SupabaseClient",
+    "methods": ["initialize", "get_client", "authenticate"]
+  }
+}

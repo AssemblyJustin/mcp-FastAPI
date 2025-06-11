@@ -1,0 +1,59 @@
+{
+  "id": "smart-crud-route-enhanced",
+  "name": "Enhanced Smart CRUD Route Generator",
+  "description": "Production-ready CRUD routes with 10/10 quality - comprehensive documentation, logging, error handling, and security",
+  "version": "3.0.0",
+  "strategy": "embedded-template",
+  
+  "parameters": {
+    "resourceName": {
+      "type": "string",
+      "required": true,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Resource name in snake_case (e.g., 'user', 'product')"
+    },
+    "modelName": {
+      "type": "string", 
+      "required": true,
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "description": "Model name in PascalCase (e.g., 'User', 'Product')"
+    },
+    "authRequired": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether authentication is required for all endpoints"
+    },
+    "routePrefix": {
+      "type": "string",
+      "default": "/api/v1",
+      "description": "API route prefix"
+    },
+    "enableDetailedLogging": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable comprehensive structured logging with request IDs"
+    },
+    "enableRoleBasedAuth": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable role-based authorization checks"
+    },
+    "enableRateLimiting": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable rate limiting on endpoints"
+    },
+    "enableOpenAPIExamples": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include comprehensive OpenAPI documentation examples"
+    }
+  },
+  
+  "codeTemplate": {
+    "language": "python",
+    "executable": true,
+    "testable": true,
+    "content": "from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, Path\nfrom typing import List, Optional\nfrom sqlalchemy.orm import Session\nimport uuid\nfrom datetime import datetime\n\nfrom ...models.{{resourceName}}_models import (\n    {{modelName}}Create,\n    {{modelName}}Update,\n    {{modelName}}Response\n)\nfrom ...services.{{resourceName}}_service import {{modelName}}Service\nfrom ...dependencies import get_db{{#if authRequired}}, get_current_user{{/if}}{{#if enableRoleBasedAuth}}, require_admin{{/if}}\n{{#if authRequired}}from ...models.auth_models import User{{/if}}\n{{#if enableDetailedLogging}}from ...utils.logging import get_logger, log_request_context\nfrom ...utils.request_context import get_request_id{{/if}}\n{{#if enableRateLimiting}}from ...middleware.rate_limiting import rate_limit{{/if}}\nfrom ...utils.exceptions import (\n    {{modelName}}NotFoundError,\n    {{modelName}}ValidationError,\n    {{modelName}}DuplicateError\n)\n\n{{#if enableDetailedLogging}}logger = get_logger(__name__){{/if}}\n\nrouter = APIRouter(\n    prefix=\"{{routePrefix}}/{{resourceName}}s\",\n    tags=[\"{{resourceName}}s\"],\n    responses={\n        400: {\n            \"description\": \"Bad Request - Invalid input data\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"Invalid {{resourceName}} data provided\"}\n                }\n            }\n        },\n        401: {\n            \"description\": \"Unauthorized - Authentication required\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"Authentication credentials required\"}\n                }\n            }\n        },\n        403: {\n            \"description\": \"Forbidden - Insufficient permissions\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"Insufficient permissions to access this resource\"}\n                }\n            }\n        },\n        404: {\n            \"description\": \"{{modelName}} not found\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"{{modelName}} with ID 123 not found\"}\n                }\n            }\n        },\n        422: {\n            \"description\": \"Validation Error - Invalid data format\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"Validation failed for field 'name'\"}\n                }\n            }\n        },\n        {{#if enableRateLimiting}}\n        429: {\n            \"description\": \"Too Many Requests - Rate limit exceeded\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"Rate limit exceeded. Try again later.\"}\n                }\n            }\n        },\n        {{/if}}\n        500: {\n            \"description\": \"Internal Server Error\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": {\"detail\": \"An unexpected error occurred\"}\n                }\n            }\n        }\n    }\n)\n\n\n@router.get(\n    \"/\",\n    response_model=List[{{modelName}}Response],\n    summary=\"List {{modelName}}s\",\n    description=\"Retrieve a paginated list of {{resourceName}}s with optional search functionality\",\n    response_description=\"List of {{resourceName}}s matching the criteria\",\n    {{#if enableRateLimiting}}\n    dependencies=[Depends(rate_limit(\"{{resourceName}}_list\", calls=100, period=60))],\n    {{/if}}\n    {{#if enableOpenAPIExamples}}\n    responses={\n        200: {\n            \"description\": \"Successful response with {{resourceName}} list\",\n            \"content\": {\n                \"application/json\": {\n                    \"example\": [\n                        {\n                            \"id\": 1,\n                            \"name\": \"Example {{modelName}}\",\n                            \"created_at\": \"2023-01-01T00:00:00Z\",\n                            \"updated_at\": \"2023-01-01T00:00:00Z\"\n                        }\n                    ]\n                }\n            }\n        }\n    }\n    {{/if}}\n)\nasync def list_{{resourceName}}s(\n    request: Request,\n    skip: int = Query(0, ge=0, description=\"Number of records to skip for pagination\"),\n    limit: int = Query(100, ge=1, le=1000, description=\"Maximum number of records to return\"),\n    search: Optional[str] = Query(None, description=\"Search term to filter {{resourceName}}s\"),\n    {{#if authRequired}}\n    current_user: User = Depends(get_current_user),\n    {{/if}}\n    db: Session = Depends(get_db)\n) -> List[{{modelName}}Response]:\n    \"\"\"\n    Retrieve a paginated list of {{resourceName}}s.\n    \n    This endpoint supports pagination and optional search functionality.\n    Results are returned in descending order by creation date.\n    \n    Args:\n        request: FastAPI request object for context\n        skip: Number of records to skip (for pagination)\n        limit: Maximum number of records to return (1-1000)\n        search: Optional search term to filter results\n        {{#if authRequired}}\n        current_user: Currently authenticated user\n        {{/if}}\n        db: Database session\n    \n    Returns:\n        List of {{modelName}}Response objects matching the criteria\n    \n    Raises:\n        HTTPException: 500 if database error occurs\n        HTTPException: 401 if authentication fails\n        {{#if enableRoleBasedAuth}}\n        HTTPException: 403 if user lacks permissions\n        {{/if}}\n    \n    Example:\n        GET {{routePrefix}}/{{resourceName}}s?skip=0&limit=10&search=example\n    \"\"\"\n    {{#if enableDetailedLogging}}\n    request_id = get_request_id(request)\n    \n    logger.info(\n        \"{{modelName}} list request initiated\",\n        extra=log_request_context(\n            request_id=request_id,\n            {{#if authRequired}}\n            user_id=current_user.id,\n            user_role=current_user.role,\n            {{/if}}\n            skip=skip,\n            limit=limit,\n            search=search,\n            endpoint=\"list_{{resourceName}}s\"\n        )\n    )\n    {{/if}}\n    \n    try:\n        service = {{modelName}}Service(db)\n        items = await service.get_{{resourceName}}s(\n            skip=skip,\n            limit=limit,\n            search=search{{#if authRequired}},\n            user_id=current_user.id{{/if}}\n        )\n        \n        response_data = [{{modelName}}Response.from_orm(item) for item in items]\n        \n        {{#if enableDetailedLogging}}\n        logger.info(\n            \"{{modelName}} list request completed successfully\",\n            extra=log_request_context(\n                request_id=request_id,\n                {{#if authRequired}}\n                user_id=current_user.id,\n                {{/if}}\n                results_count=len(response_data),\n                endpoint=\"list_{{resourceName}}s\"\n            )\n        )\n        {{/if}}\n        \n        return response_data\n        \n    except Exception as e:\n        {{#if enableDetailedLogging}}\n        logger.error(\n            \"{{modelName}} list request failed\",\n            extra=log_request_context(\n                request_id=request_id,\n                {{#if authRequired}}\n                user_id=current_user.id,\n                {{/if}}\n                error=str(e),\n                error_type=type(e).__name__,\n                endpoint=\"list_{{resourceName}}s\"\n            )\n        )\n        {{/if}}\n        \n        raise HTTPException(\n            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,\n            detail=f\"Failed to retrieve {{resourceName}}s{{#if enableDetailedLogging}}. Request ID: {request_id}{{/if}}\"\n        )"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "create-supabase-auth",
+  "action": "create",
+  "layer": "database",
+  "resource": "supabase-auth",
+  "description": "Creates Supabase authentication",
+  "template": {
+    "imports": ["from supabase import Client"],
+    "class_name": "SupabaseAuth",
+    "methods": ["sign_up", "sign_in", "sign_out", "get_user"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "create-tool-validator",
+  "action": "create",
+  "layer": "tool",
+  "resource": "validator",
+  "description": "Creates a validation MCP tool",
+  "template": {
+    "imports": ["from typing import Any, Dict"],
+    "class_name": "ValidatorTool",
+    "methods": ["validate_code", "check_conventions"]
+  }
+}

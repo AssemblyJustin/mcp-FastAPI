@@ -1,0 +1,12 @@
+{
+  "name": "create-connection-setup",
+  "action": "create",
+  "layer": "database",
+  "resource": "connection",
+  "description": "Creates database connection setup",
+  "template": {
+    "imports": ["from sqlalchemy import create_engine"],
+    "class_name": "DatabaseConnection",
+    "methods": ["connect", "disconnect", "get_session"]
+  }
+}

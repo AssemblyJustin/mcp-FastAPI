@@ -1,0 +1,12 @@
+{
+  "name": "create-logging",
+  "action": "create",
+  "layer": "system",
+  "resource": "logging",
+  "description": "Creates logging system",
+  "template": {
+    "imports": ["import logging", "from typing import Any"],
+    "class_name": "LoggingSystem",
+    "methods": ["setup_logging", "log_request", "log_error"]
+  }
+}

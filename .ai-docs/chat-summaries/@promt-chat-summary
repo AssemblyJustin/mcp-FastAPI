@@ -1,0 +1,67 @@
+Write a detailed summary of this chat thread for project tracking and documentation.
+
+## Instructions for Chat Summary Creation
+
+I want to track how this project develops over time. Please create a comprehensive summary of this entire chat thread following these exact specifications:
+
+### File Naming and Location
+- Save the summary in the `.ai-docs/chat-summaries/` directory
+- Use filename format: `[yymmdd]-[descriptive-chat-title].md`
+- Ensure the date is TODAY'S DATE in YYMMDD format (e.g., 241215 for December 15, 2024)
+- Create a descriptive title that captures the main focus of this thread
+
+### Document Structure
+
+#### 1. Document Header
+- Title: The descriptive chat title
+- Date: Full date (e.g., December 15, 2024)
+- Thread Duration: Start and end timestamps if available
+
+#### 2. Executive Summary
+- Brief overview of the thread's main objectives
+- Key outcomes and achievements
+- Overall impact on the project
+
+#### 3. Detailed Prompt Analysis
+For EACH user prompt in this thread:
+
+**3a) Prompt Subheading**
+- Use the EXACT wording from my original prompt as the subheading
+- Do not paraphrase or summarize the prompt text
+- Include the full prompt text verbatim
+
+**3b) AI Agent Response Analysis**
+- Provide a VERBOSE description of what the AI agent did in response
+- Include specific tools used (e.g., codebase-retrieval, str-replace-editor, view, etc.)
+- Detail the reasoning and decision-making process
+- Describe any research or information gathering performed
+- Explain the approach taken and why
+
+**3c) Files Created**
+- Complete list of all new files created
+- Include full file paths
+- Brief description of each file's purpose
+
+**3d) Files Modified/Edited**
+- Complete list of all files that were edited or modified
+- Include full file paths
+- Description of what changes were made to each file
+
+**3e) Actions Taken**
+- List of all significant actions beyond file operations
+- Include tool usage, searches performed, processes launched
+- Any external resources accessed or referenced
+
+#### 4. Thread Achievement Summary
+- Comprehensive overview of what this entire thread accomplished
+- Progress made toward project goals
+- Problems solved or challenges addressed
+- Knowledge gained or insights discovered
+- Next steps or follow-up items identified
+
+### Quality Requirements
+- Be thorough and detailed - this is for project documentation
+- Maintain accuracy - copy prompts exactly as written
+- Use proper markdown formatting
+- Include all relevant technical details
+- Ensure the summary serves as a complete record of the thread's activities

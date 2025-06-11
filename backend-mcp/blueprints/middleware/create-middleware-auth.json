@@ -1,0 +1,12 @@
+{
+  "name": "create-middleware-auth",
+  "action": "create",
+  "layer": "middleware",
+  "resource": "auth",
+  "description": "Creates authentication middleware",
+  "template": {
+    "imports": ["from fastapi import Request, HTTPException"],
+    "class_name": "AuthMiddleware",
+    "methods": ["authenticate", "authorize"]
+  }
+}

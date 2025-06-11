@@ -1,0 +1,12 @@
+{
+  "name": "create-repository-user",
+  "action": "create",
+  "layer": "repository",
+  "resource": "user",
+  "description": "Creates user repository for traditional database",
+  "template": {
+    "imports": ["from sqlalchemy.orm import Session"],
+    "class_name": "UserRepository",
+    "methods": ["create", "get", "update", "delete", "list"]
+  }
+}

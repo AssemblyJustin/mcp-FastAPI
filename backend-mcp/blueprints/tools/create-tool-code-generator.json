@@ -1,0 +1,12 @@
+{
+  "name": "create-tool-code-generator",
+  "action": "create",
+  "layer": "tool",
+  "resource": "code-generator",
+  "description": "Creates a code generation MCP tool",
+  "template": {
+    "imports": ["from typing import Any, Dict"],
+    "class_name": "CodeGeneratorTool",
+    "methods": ["generate_code", "validate_template"]
+  }
+}
